@@ -29,25 +29,22 @@ defmodule Solution.CLI do
 
     "Game " <> id = game_with_id
 
-    result =
-      case valid(sets) do
-        true -> String.to_integer(id)
-        false -> 0
-      end
-
     dbg()
 
-    result
+    game_power(sets)
   end
 
-  def valid([sets]) do
+  def game_power([sets]) do
     sets
     |> String.split(";", trim: true)
     |> Enum.map(&get_cube_count_map/1)
-    |> Enum.all?(&smaller_than?/1)
-    |> IO.inspect()
-
-    # Enum.reduce(&max_cube_count_map(&1))
+    |> Enum.reduce(
+      &Map.merge(&1, &2, fn _key, value1, value2 ->
+        max(value1, value2)
+      end)
+    )
+    |> Map.values()
+    |> Enum.reduce(&(&1 * &2))
   end
 
   def get_cube_count_map(set) do
@@ -57,8 +54,6 @@ defmodule Solution.CLI do
     |> String.split(",")
     |> Enum.map(&cube_map/1)
     |> Enum.reduce(&Map.merge/2)
-
-    # |> dbg()
   end
 
   def cube_map(cube) do
